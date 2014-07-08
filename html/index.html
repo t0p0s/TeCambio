@@ -1,0 +1,125 @@
+<html>
+<style type="text/css">
+#figuritaRepetida{
+	float: left;
+	padding: 10px;
+	background-color: #F2F2F2;
+	border-radius: 30;
+	margin-right: 5px;
+}
+</style>
+<body>
+	First name: <input type="text" name="fname" id="name"><br>
+	<input id="search" type="submit" value="Entrar">
+	<div id="figus" style="visibility: hidden">
+		<div>
+		<h2>Having...</h2>
+		<div id="having"></div>
+		</div>
+		<div>
+		<h2>Missing...</h2>
+		<div id="missing"></div>
+		</div>
+	</div>
+	<div style="visibility: hidden">
+		<div id="figuritaRepetida">
+			Nro: <div id="nro"></div>
+			Cantidad: <div id="qty"></div>
+			<a href="#" class="add" value="add">(+)</a>
+			<a href="#" class="subt" value="subst">(-)</a>
+		</div>
+	</div>
+	<input id="save" type="submit" value="Guardar">
+</body>
+<script src="//code.jquery.com/jquery-1.11.0.min.js"></script>
+<script type="text/javascript" src="/parse-1.2.18.min.js"></script>
+<script type="text/javascript">
+	
+	Parse.initialize("fhHdcvJ4McSgXRLp3CnmgpGA0oJq7hasi4mj8mUC", "rxzzqaaFzYRvdvMv0RtXAcbjAlTzh9PrxYrwYteN");
+
+	function redraw(object){
+		$("#having").html("");
+		$("#missing").html("");
+		 for (var j = 0; j < object.attributes.having.length; j++){
+	      	var figuRep = $("#figuritaRepetida").clone();
+	      	figuRep.find( "#nro" ).html(object.attributes.having[j].nro);
+	      	figuRep.find( "#qty" ).html(object.attributes.having[j].qty);
+	      	$("#having").append(figuRep);
+	      }
+
+	      for (var j = 0; j < object.attributes.missing.length; j++){
+	      	var figuRep = $("#figuritaRepetida").clone();
+	      	figuRep.find( "#nro" ).html(object.attributes.missing[j]);
+	      	figuRep.find( "#qty" ).html(0);
+
+	      	$("#missing").append(figuRep);
+      	  }
+      	  $("#having .add").on("click",function(){
+		      	var nro = $(this).parent().find("#nro").html();
+		      	for (var j = 0; j < object.attributes.having.length; j++){
+		      		if(object.attributes.having[j].nro == nro){
+		      			object.attributes.having[j].qty = object.attributes.having[j].qty + 1;
+		      			break;
+		      		}
+		      	}
+		      	redraw(object);
+		      });
+
+		      $("#missing .add").on("click",function(){
+		      	var nro = $(this).parent().find("#nro").html();
+		      	
+		      	for (var j = 0; j < object.attributes.missing.length; j++){
+		      		if(object.attributes.missing[j] == nro){
+		      			object.attributes.missing.splice(j,1);
+		      			object.attributes.having.push({"nro":nro,"qty":1});
+		      		}
+		      	}
+		      	redraw(object);
+		      });
+
+		      $("#having .subt").on("click",function(){
+		      	var nro = $(this).parent().find("#nro").html();
+		      	for (var j = 0; j < object.attributes.having.length; j++){
+		      		if(object.attributes.having[j].nro == nro){
+		      			object.attributes.having[j].qty = object.attributes.having[j].qty - 1;
+		      			if (object.attributes.having[j].qty == 0){
+		      				object.attributes.having.splice(j,1);
+		      				object.attributes.missing.push(nro);
+		      			}
+		      			break;
+		      		}
+		      	}
+		      	redraw(object);
+		  	  });
+
+		  	  $("#missing .subt").css("visibility","hidden");
+	}
+
+	var object;
+	$("#search").on("click", function(){
+		var GameScore = Parse.Object.extend("GameScore");
+		var query = new Parse.Query(GameScore);
+		query.equalTo("player", $("#name").val());
+		query.find({
+		  success: function(results) {
+		  	for (var i = 0; i < results.length; i++) { 
+		      object = results[i];
+		      redraw(object);
+		      
+		    }
+		    $("#figus").css("visibility","");
+		  },
+		  error: function(error) {
+		    alert("Error: " + error.code + " " + error.message);
+		  }
+		});
+	});
+
+	$("#save").on("click", function(){
+		var GameScore = Parse.Object.extend("GameScore");
+		var gameScore = new GameScore();
+		gameScore.set(object);
+		gameScore.save();
+	});
+</script>
+</html>
