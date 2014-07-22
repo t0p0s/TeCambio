@@ -79,7 +79,17 @@
 
 	function initAlbumForm(){
 		$(".albumDiv .albumForm").submit(function(){
-			alert("hola");
+			var albumId = $(this).children("#albumId").val();
+			var Album = Parse.Object.extend("Album");
+			var query = new Parse.Query(Album);
+			query.get(albumId, {
+			  success: function(album) {
+			  	
+			  },
+			  error: function(object, error) {
+			  	alert("error al obtener album");
+			  }
+			});
 			return false;
 		});	
 	}
