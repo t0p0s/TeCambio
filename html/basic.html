@@ -1,0 +1,106 @@
+<html>
+<style type="text/css">
+#figuritaRepetida{
+	float: left;
+	padding: 10px;
+	background-color: #F2F2F2;
+	border-radius: 30;
+	margin-right: 5px;
+}
+.album{
+	float: left;
+	padding: 10px;
+	background-color: #F2F2F2;
+	border-radius: 30;
+	margin-right: 5px;
+}
+#albumForm{
+	margin-bottom: 0px;
+}
+</style>
+<body>
+	<div>
+		User: <input type="text" name="user" id="user">
+		<input id="userSubmit" type="submit" value="Entrar">
+	</div>
+	<div id="albumes" style="visibility: hidden">
+		<div class="albumMock" style="visibility: hidden"><div id="title">Titulo</div><div id="description">Bla bla</div><form id="albumForm" class="albumForm"><input id="albumId" type="hidden" value=""/><input id="albumSubmit" type="submit" value="Entrar"></form></div>
+		<div class="albumDiv">
+		</div>
+	</div> 
+	<div id="figus" style="visibility: hidden">
+		<div style="visibility: hidden">
+			<div id="figuritaRepetida">
+				Nro: <div id="nro"></div>
+				Cantidad: <div id="qty"></div>
+				<a href="#" class="add" value="add">(+)</a>
+				<a href="#" class="subt" value="subst">(-)</a>
+			</div>
+		</div>
+		<input id="figusSubmit" type="submit" value="Guardar">
+	</div>
+	
+</body>
+<script src="//code.jquery.com/jquery-1.11.0.min.js"></script>
+<script type="text/javascript" src="/parse-1.2.18.min.js"></script>
+<script type="text/javascript">
+	Parse.initialize("fhHdcvJ4McSgXRLp3CnmgpGA0oJq7hasi4mj8mUC", "rxzzqaaFzYRvdvMv0RtXAcbjAlTzh9PrxYrwYteN");
+
+	function getAlbumes(albumes){
+		var Album = Parse.Object.extend("Album");
+		var query = new Parse.Query(Album);
+		query.find({
+		  success: function(results) {
+		  	for (var i = 0; i < results.length; i++) { 
+		      object = results[i];
+		      var objectId = object.id;
+		      var title = object.get("title");
+		      var description = object.get("description");
+			  var album = $(".albumMock").clone();
+		      album.removeClass("albumMock");
+		      album.addClass("album");
+		      $(album).children("#title").html(title);
+		      $(album).children("#description").html(description);
+		      $(album).children("#albumForm").children("#albumId").val(objectId);
+		      if ($.inArray(objectId, albumes) > -1){
+		      	$(album).children("#albumForm").children("#albumSubmit").val("Modificar");
+		      }
+		      album.css("visibility","");
+		      $(".albumDiv").append(album);
+		    }
+		    $("#albumes").css("visibility","");
+		    initAlbumForm();
+		  },
+		  error: function(error) {
+		    alert("Error: " + error.code + " " + error.message);
+		  }
+		});
+	};
+
+	function initAlbumForm(){
+		$(".albumDiv .albumForm").submit(function(){
+			alert("hola");
+			return false;
+		});	
+	}
+
+	$("#userSubmit").on("click", function(){
+		$(".albumDiv").html("");
+		var User = Parse.Object.extend("UserInfo");
+		var query = new Parse.Query(User);
+		query.equalTo("user", $("#user").val());
+		query.find({
+		  success: function(results) {
+		  	if (results.length > 0){
+		  		var albumes = results[0].get("albumes");
+	  		};
+		  	getAlbumes(albumes);
+		  },
+		  error: function(error) {
+		    alert("Error: " + error.code + " " + error.message);
+		  }
+		});
+	});
+	
+</script>
+</html>
